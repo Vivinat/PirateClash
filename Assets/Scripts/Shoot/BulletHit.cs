@@ -14,6 +14,7 @@ public class BulletHit : MonoBehaviour
 {
     [SerializeField] private int lifeTime;
     [SerializeField] private BulletType bulletType;
+    [SerializeField] private int bulletDamage;
     private void OnTriggerEnter2D(Collider2D col)
     {
         switch (bulletType)
@@ -22,7 +23,7 @@ public class BulletHit : MonoBehaviour
                 if (col.CompareTag("Player"))
                 {
                     PlayerController player = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
-                    player.TakeDamage();
+                    player.TakeDamage(bulletDamage);
                     Destroy(gameObject);    
                 }
                 break;

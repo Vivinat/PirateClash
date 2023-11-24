@@ -143,7 +143,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &24329580
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -162,9 +162,10 @@ MonoBehaviour:
   attackRange: 5
   cooldown: 3
   life: 1
+  attackDamage: 1
   bulletPrefab: {fileID: 7518707058539387421, guid: 354df9b3155dec944bc4c31b1bd5b02c, type: 3}
   shootSpeed: 2
-  enemyDamaged: {fileID: 21300000, guid: fce4d94bafb32204981d67d2ff87e891, type: 3}
+  enemyDamagedSprite: {fileID: 0}
   flashMaterial: {fileID: 2100000, guid: c692364cc5579724d97e48f947890e3a, type: 2}
   duration: 0.1
   maxLife: 0
@@ -338,7 +339,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!95 &381461779
 Animator:
   serializedVersion: 5
@@ -375,12 +376,13 @@ MonoBehaviour:
   currentState: 0
   enemyType: 0
   speed: 3
-  attackRange: 1.1
+  attackRange: 1.5
   cooldown: 3
   life: 1
+  attackDamage: 1
   bulletPrefab: {fileID: 7518707058539387421, guid: 354df9b3155dec944bc4c31b1bd5b02c, type: 3}
   shootSpeed: 2
-  enemyDamaged: {fileID: 21300000, guid: db6ec15c10b60af44b9fa2849a752953, type: 3}
+  enemyDamagedSprite: {fileID: 0}
   flashMaterial: {fileID: 2100000, guid: c692364cc5579724d97e48f947890e3a, type: 2}
   duration: 0.1
   maxLife: 0
@@ -416,8 +418,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1.03125, y: 1.765625}
+  m_Offset: {x: 0.005043148, y: 0.015557406}
+  m_Size: {x: 1.1323758, y: 1.8557872}
   m_Direction: 0
 --- !u!50 &381461782
 Rigidbody2D:
@@ -444,7 +446,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
   m_Constraints: 4
 --- !u!212 &381461783
 SpriteRenderer:
@@ -506,13 +508,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 381461778}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 8.61, y: -0.33, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
 --- !u!1 &384886163
 GameObject:
   m_ObjectHideFlags: 0
@@ -934,8 +936,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1.03125, y: 1.765625}
+  m_Offset: {x: 0.0058865547, y: 0.0008262396}
+  m_Size: {x: 1.1169562, y: 1.8221881}
   m_Direction: 0
 --- !u!50 &1724526336
 Rigidbody2D:

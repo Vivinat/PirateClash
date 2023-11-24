@@ -153,9 +153,9 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    public void TakeDamage()
+    public void TakeDamage(int bulletDamage)
     {
-        playerHealth -= 1;
+        playerHealth -= bulletDamage;
         if (playerHealth <= 0)
         {
             playerHealth = 0;

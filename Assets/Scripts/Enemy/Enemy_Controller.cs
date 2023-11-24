@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public enum EnemyState
 {
@@ -23,9 +25,10 @@ public class Enemy_Controller : MonoBehaviour
         [SerializeField] private float attackRange;
         [SerializeField] private int cooldown;
         [SerializeField] private int life;
+        [SerializeField] private int attackDamage;
         [SerializeField] private GameObject bulletPrefab;
         [SerializeField] private float shootSpeed = 2;
-        [SerializeField] private Sprite enemyDamaged;
+        [SerializeField] private Sprite enemyDamagedSprite;
         
         [SerializeField] private Material flashMaterial;
         [SerializeField] private float duration;
@@ -38,6 +41,7 @@ public class Enemy_Controller : MonoBehaviour
 
         private Animator enemyAnimator;
         private PlayerController player;
+        private Rigidbody2D enemyRb;
         
         void Start()
         {
@@ -45,6 +49,7 @@ public class Enemy_Controller : MonoBehaviour
             player = FindObjectOfType<PlayerController>();    
             spriteRenderer = GetComponent<SpriteRenderer>();
             enemyAnimator = GetComponent<Animator>();
+            enemyRb = GetComponent<Rigidbody2D>();
             originalMaterial = spriteRenderer.material;
         }
         
@@ -76,8 +81,21 @@ public class Enemy_Controller : MonoBehaviour
         
         void Follow()
         {
-            transform.position = Vector2.MoveTowards(transform.position, player.transform.position, speed * Time.deltaTime);
+            Vector3 direction = player.GetComponent<Transform>().position - transform.position; // Direção para o jogador
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + 90; // Calcula o ângulo
+            Quaternion rotation = Quaternion.Euler(new Vector3(0, 0, angle)); // Cria a rotação
+
+            // Rotaciona para encarar o jogador
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation, 200f * Time.deltaTime);
+
+            // Verifica se o inimigo está encarando o jogador
+            if (Vector3.Distance(transform.rotation.eulerAngles, rotation.eulerAngles) < 10.0f)
+            {
+                // Move o inimigo em direção ao jogador
+                transform.position = Vector2.MoveTowards(transform.position, player.GetComponent<Transform>().position, speed * Time.deltaTime);
+            }
         }
+
 
         void Attack()
         {
@@ -86,7 +104,6 @@ public class Enemy_Controller : MonoBehaviour
                 switch(enemyType)
                 {
                     case(EnemyType.Chaser):
-                        ChaserAutoDestruction();
                         break;
                     case(EnemyType.Shooter):
                         GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
@@ -94,6 +111,17 @@ public class Enemy_Controller : MonoBehaviour
                         enemyBulletRb.velocity = player.GetComponent<Transform>().position * shootSpeed;
                         StartCoroutine(CoolDown());
                         break;
+                }
+            }
+        }
+
+        private void OnCollisionEnter2D(Collision2D other)
+        {
+            if (enemyType == EnemyType.Chaser)
+            {
+                if (other.gameObject.CompareTag("Player"))
+                {
+                    ChaserAutoDestruction();
                 }
             }
         }
@@ -111,7 +139,7 @@ public class Enemy_Controller : MonoBehaviour
 
             if (life < maxLife/2)
             {
-                spriteRenderer.sprite = enemyDamaged;
+                spriteRenderer.sprite = enemyDamagedSprite;
             }
             
             if (life <= 0)
@@ -122,7 +150,7 @@ public class Enemy_Controller : MonoBehaviour
 
         private void ChaserAutoDestruction()
         {
-            player.TakeDamage();
+            player.TakeDamage(attackDamage);
             Die();
         }
 
@@ -134,6 +162,7 @@ public class Enemy_Controller : MonoBehaviour
         IEnumerator WaitForAnimationToEnd()
         {
             cooldownAttack = true;   
+            
             enemyAnimator.SetBool("IsDead", true);
             yield return new WaitForSeconds(enemyAnimator.GetCurrentAnimatorStateInfo(0).length);
             Destroy(gameObject);
