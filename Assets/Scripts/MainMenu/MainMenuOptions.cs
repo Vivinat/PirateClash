@@ -7,9 +7,14 @@ using Utils;
 
 public class MainMenuOptions : MonoBehaviour
 {
-    
     public void TutorialScene()
     {
+        if (!PlayerPrefs.HasKey(Constants.SpawnTimePref))
+        {
+            PlayerPrefs.SetFloat(Constants.SessionTimePref, 1f);
+            PlayerPrefs.SetFloat(Constants.SpawnTimePref, 3f);    
+            PlayerPrefs.Save();
+        }
         SceneManager.LoadScene(Constants.TutorialScene);
     }
 

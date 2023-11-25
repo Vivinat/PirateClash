@@ -42,6 +42,6 @@ public class OptionsController : MonoBehaviour
         PlayerPrefs.Save();
         Debug.Log("Saving Spawner Timer to Prefs " + PlayerPrefs.GetFloat(Constants.SpawnTimePref));
         Debug.Log("Saving Session Timer to Prefs " + PlayerPrefs.GetFloat(Constants.SessionTimePref));
-        SceneManager.LoadScene("Menu");
+        SceneManager.LoadScene(Constants.MainMenuScene);
     }
 }
