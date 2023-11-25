@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Enemy
+  - Obstacle
+  - TutoImg
   layers:
   - Default
   - TransparentFX
@@ -50,4 +52,7 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 2289730289
+    locked: 0
+  - name: Decorations
+    uniqueID: 2301074321
     locked: 0

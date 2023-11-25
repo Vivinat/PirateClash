@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: OptionsSO
   m_EditorClassIdentifier: 
   gameSessionTime: 1
-  enemySpawnTime: 5
+  enemySpawnTime: 3

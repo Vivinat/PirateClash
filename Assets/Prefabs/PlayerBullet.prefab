@@ -101,6 +101,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lifeTime: 10
   bulletType: 0
+  bulletDamage: 1
 --- !u!58 &354974480443865977
 CircleCollider2D:
   m_ObjectHideFlags: 0

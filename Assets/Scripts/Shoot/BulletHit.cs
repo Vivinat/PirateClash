@@ -30,10 +30,14 @@ public class BulletHit : MonoBehaviour
             case BulletType.player:
                 if (col.CompareTag("Enemy"))
                 {
-                    col.gameObject.GetComponent<Enemy_Controller>().TakeDamage();
+                    col.gameObject.GetComponent<EnemyController>().TakeDamage();
                     Destroy(gameObject);    
                 }
                 break;
+        }
+        if (col.CompareTag("Obstacle"))
+        {
+            Destroy(gameObject);
         }
     }
 

@@ -1,37 +1,45 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
-using UnityEngine.InputSystem.Interactions;
+using UnityEngine.SceneManagement;
+using Utils;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private int playerHealth;
+    public int playerHealth;
+    public int maxHealth;
     [SerializeField] private float playerSpeed = 5.0f;
     [SerializeField] private float rotationSpeed = 100.0f;
     [SerializeField] private GameObject singleShoot;
     [SerializeField] private float shootSpeed;
     [SerializeField] private float shootDelay;
     [SerializeField] private GameObject cannonPivot;
-    [SerializeField] private int tripleShootQuant = 99;
+    [SerializeField] private HealthBar healthBar;
     
-    private Rigidbody2D _playerRb;
-    private BoxCollider2D _playerCollider;
-    private Animator _playerAnimator;
+    [SerializeField] private Material flashMaterial;
+    [SerializeField] private float duration;
+    private Material originalMaterial;
+    private Coroutine flashRoutine;
+    
+    private Rigidbody2D playerRb;
+    private Animator playerAnimator;
+    private SpriteRenderer spriteRenderer;
     
     private float moveInput;
     private float rotateInput;
     private bool rotateClockwise;
     private bool rotateCounterClockwise;
     private bool isRotating;
-    public bool canFire = true;
+    private bool canFire = true;
+    
     private void Start()
     {
-        _playerRb = GetComponent<Rigidbody2D>();
-        _playerCollider = GetComponent<BoxCollider2D>();
-        _playerAnimator = GetComponent<Animator>();
+        maxHealth = playerHealth;
+        playerRb = GetComponent<Rigidbody2D>();
+        playerAnimator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        originalMaterial = spriteRenderer.material;
     }
 
     private void Update()
@@ -58,7 +66,7 @@ public class PlayerController : MonoBehaviour
     void Move()
     {
         Vector2 forward = transform.up;
-        _playerRb.velocity = -forward * moveInput * playerSpeed;
+        playerRb.velocity = -forward * moveInput * playerSpeed;
     }
 
     public void OnFoward(InputAction.CallbackContext context)
@@ -102,7 +110,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnFireTripleShot(InputAction.CallbackContext context)
     {
-        if (canFire && tripleShootQuant > 0)
+        if (canFire)
         {
             StartCoroutine(ShootTripleBullets());
         }
@@ -111,7 +119,6 @@ public class PlayerController : MonoBehaviour
     IEnumerator ShootOneBullet()
     {
         canFire = false;
-        Debug.Log("Atira");
         
         float playerRotation = transform.rotation.eulerAngles.z;
         Vector2 bulletDirection = Quaternion.Euler(0, 0, playerRotation) * Vector2.down;
@@ -126,8 +133,6 @@ public class PlayerController : MonoBehaviour
     IEnumerator ShootTripleBullets()
     {
         canFire = false;
-        tripleShootQuant--;
-        Debug.Log("Atira 3");
         
         float cannonRotation = cannonPivot.transform.rotation.eulerAngles.z;
         
@@ -147,6 +152,23 @@ public class PlayerController : MonoBehaviour
 
         Rigidbody2D rbRight = shootRight.GetComponent<Rigidbody2D>();
         rbRight.velocity = rightDirection * shootSpeed;
+        
+        Vector2 centralDirectionParallel = Quaternion.Euler(0, 0, cannonRotation) * Vector2.left;
+        Vector2 leftDirectionParallel = Quaternion.Euler(0, 0, cannonRotation) * new Vector2(-1, 1);
+        Vector2 rightDirectionParallel = Quaternion.Euler(0, 0, cannonRotation) * new Vector2(-1, -1);
+
+        GameObject shootLeftParallel = Instantiate(singleShoot, cannonPivot.transform.position, Quaternion.identity);
+        GameObject shootCentralParallel = Instantiate(singleShoot, cannonPivot.transform.position, Quaternion.identity);
+        GameObject shootRightParallel = Instantiate(singleShoot, cannonPivot.transform.position, Quaternion.identity);
+
+        Rigidbody2D rbCentralParallel = shootCentralParallel.GetComponent<Rigidbody2D>();
+        rbCentralParallel.velocity = centralDirectionParallel * shootSpeed;
+
+        Rigidbody2D rbLeftParallel = shootLeftParallel.GetComponent<Rigidbody2D>();
+        rbLeftParallel.velocity = leftDirectionParallel * shootSpeed;
+
+        Rigidbody2D rbRightParallel = shootRightParallel.GetComponent<Rigidbody2D>();
+        rbRightParallel.velocity = rightDirectionParallel * shootSpeed;
 
         yield return new WaitForSecondsRealtime(shootDelay);
         canFire = true;
@@ -155,7 +177,14 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage(int bulletDamage)
     {
+        StartCoroutine(ShootAnimation());
+        Flash();
         playerHealth -= bulletDamage;
+        if (playerHealth <= maxHealth / 2)
+        {
+            playerAnimator.SetBool(Constants.IsDamaged, true);
+        }
+        healthBar.UpdateHealthBar();
         if (playerHealth <= 0)
         {
             playerHealth = 0;
@@ -170,9 +199,35 @@ public class PlayerController : MonoBehaviour
         
     IEnumerator WaitForAnimationToEnd()
     {
+        playerAnimator.SetBool(Constants.IsDamaged, false);   
         GetComponent<PlayerInput>().DeactivateInput();
-        _playerAnimator.SetBool("IsDead", true);
-        yield return new WaitForSeconds(_playerAnimator.GetCurrentAnimatorStateInfo(0).length);
-        Debug.Log("Morreu");
+        playerAnimator.SetBool(Constants.IsDead, true);
+        yield return new WaitForSeconds(playerAnimator.GetCurrentAnimatorStateInfo(0).length);
+        SceneManager.LoadScene(Constants.EndScene);
     }
+    
+    private IEnumerator FlashRoutine()
+    {
+        spriteRenderer.material = flashMaterial;    
+        yield return new WaitForSeconds(duration);  
+        spriteRenderer.material = originalMaterial; 
+        flashRoutine = null;                        
+    }
+
+    private void Flash()
+    {
+        if (flashRoutine != null)  
+        {
+            StopCoroutine (flashRoutine);   
+        }
+        flashRoutine = StartCoroutine(FlashRoutine());  
+    }
+    
+    IEnumerator ShootAnimation()
+    {
+        cannonPivot.GetComponent<Renderer>().sortingLayerID = SortingLayer.NameToID("Decorations");
+        yield return new WaitForSeconds(duration);
+        cannonPivot.GetComponent<Renderer>().sortingLayerID = SortingLayer.NameToID("Background");
+    }
+    
 }

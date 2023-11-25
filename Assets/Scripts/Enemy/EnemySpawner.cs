@@ -1,27 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject swarmerPrefab;
-
-    [SerializeField]
-    private float swarmerInterval = 3.5f;
-
-    // Start is called before the first frame update
+    [SerializeField]private GameObject swarmerPrefab;
+    
     void Start()
     {
-        //Manda o inimigo e o tempo de summon
-        StartCoroutine(spawnEnemy(swarmerInterval, swarmerPrefab));
+        float spawnTime = PlayerPrefs.GetFloat(Constants.SpawnTimePref);
+        StartCoroutine(spawnEnemy(spawnTime, swarmerPrefab));
     }
 
     private IEnumerator spawnEnemy(float swarmerInterval, GameObject enemy)
     {
-        yield return new WaitForSeconds(swarmerInterval);  //Qual o intervalo de spawn?
-        GameObject newEnemy = Instantiate(enemy, new Vector3(Random.Range(-1f,1), Random.Range(-1f,1f),-1.6f), Quaternion.identity); 
-        //Cria o inimigo novo numa posição determinada pelo Vetor
-        StartCoroutine(spawnEnemy(swarmerInterval, enemy));    //Existe potencial para ser ilimitado
+        yield return new WaitForSecondsRealtime(swarmerInterval);  
+        GameObject newEnemy = Instantiate(enemy, transform.position + new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0f), Quaternion.identity);
+        StartCoroutine(spawnEnemy(swarmerInterval, enemy));    
     }
 }
